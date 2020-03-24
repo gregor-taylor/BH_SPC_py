@@ -11,41 +11,41 @@ import SPC_defs as defs
 
 ###Main Class###
 class SPC_module(BH.SPC):
-	def __init__(self, mod_no, ini_file='SET_DEFAULT_INI'):
-		super().__init__(mod_no, ini_file)
-		#Intialises measurement parameters from ini file to the module
-		self.SPC_init(self.ini_file)
-		self.get_init_status(self.mod_no)#Checks the init is OK
-		if self.last_retcode == 0: #all ok
-		    mod_name = 'mod_'+str(mod_no)
-		    setattr(self.in_use, mod_name, ct.c_int(1))#Update in_use table to 1 for initialised ones.
-		    self.get_parameters(self.mod_no) #reads the parameters back to the 'SPCdata' structure
-		else:
-			print(defs.Init_Error_Codes[self.last_retcode]) #stop as init failed so check errors
+    def __init__(self, mod_no, ini_file='SET_DEFAULT_INI'):
+        super().__init__(mod_no, ini_file)
+        #Intialises measurement parameters from ini file to the module
+        self.SPC_init(self.ini_file)
+        self.get_init_status(self.mod_no)#Checks the init is OK
+        if self.last_retcode == 0: #all ok
+            mod_name = 'mod_'+str(mod_no)
+            setattr(self.in_use, mod_name, ct.c_int(1))#Update in_use table to 1 for initialised ones.
+            self.get_parameters(self.mod_no) #reads the parameters back to the 'SPCdata' structure
+        else:
+            print(defs.Init_Error_Codes[self.last_retcode]) #stop as init failed so check errors
 
-	def modify_parameters(self, parameters_to_update):
-		#Takes a list of tuples of the parameter names to update (from SPCData). Use if more than a few paramters but if updating the
-		#whole lot better to use set_parameters with a whole new structure of type SPCData. You need to provide the values as the correct c type.
-		#parameters_to_update of the form [('tac_range', ct.c_float(50)), ...etc...]
-		for i in parameters_to_update:
-			setattr(self.SPCdata, i[0], i[1])
-		#Then run set_and_check
-		self.set_and_check_parameters()
+    def modify_parameters(self, parameters_to_update):
+        #Takes a list of tuples of the parameter names to update (from SPCData). Use if more than a few paramters but if updating the
+        #whole lot better to use set_parameters with a whole new structure of type SPCData. You need to provide the values as the correct c type.
+        #parameters_to_update of the form [('tac_range', ct.c_float(50)), ...etc...]
+        for i in parameters_to_update:
+            setattr(self.SPCdata, i[0], i[1])
+        #Then run set_and_check
+        self.set_and_check_parameters()
 
-	def set_and_check_parameters(self, mod_no=None):
-		if mod_no == None:
-			mod_no=self.mod_no
-		self.set_parameters(mod_no) #sets the parameters to the SPCData data
-		self.get_parameters(mod_no) #reads them back 
-		#Add comparison of old data and new?
+    def set_and_check_parameters(self, mod_no=None):
+        if mod_no == None:
+            mod_no=self.mod_no
+        self.set_parameters(mod_no) #sets the parameters to the SPCData data
+        self.get_parameters(mod_no) #reads them back 
+        #Add comparison of old data and new?
 
-	def set_and_check_parameter(self, par_id, value, mod_no=None): #for single parameter updates
-		if mod_no == None:
-			mod_no=self.mod_no
-		self.set_parameter(mod_no, par_id, value) #set a particular parameter
-		self.get_parameter(mod_no, par_id) #Checks the value
-		if self.SPC_value.value != value:
-			print("%f out of range! Value set to %f"(value, self.SPC_value.value)) 
+    def set_and_check_parameter(self, par_id, value, mod_no=None): #for single parameter updates
+        if mod_no == None:
+            mod_no=self.mod_no
+        self.set_parameter(mod_no, par_id, value) #set a particular parameter
+        self.get_parameter(mod_no, par_id) #Checks the value
+        if self.SPC_value.value != value:
+            print("%f out of range! Value set to %f"(value, self.SPC_value.value)) 
 
 ###########################################
 ####show functions for command line use####
@@ -53,15 +53,15 @@ class SPC_module(BH.SPC):
 
     def print_values(self, ctype_struct): #helper func to print the keys and values of the ctypes structures.
         for field in ctype_struct._fields_:
-        	print(field[0], getattr(ctype_struct, field[0]))
+            print(field[0], getattr(ctype_struct, field[0]))
 
     def show_module_info(self):
-    	self.get_module_info(self.mod_no)
-    	self.print_values(self.mod_info)
+        self.get_module_info(self.mod_no)
+        self.print_values(self.mod_info)
 
     def show_parameters(self):
-    	self.get_parameters(self.mod_no)
-    	self.print_values(self.SPCdata)
+        self.get_parameters(self.mod_no)
+        self.print_values(self.SPCdata)
 
     def show_eeprom_data(self):
         self.get_eeprom_data(self.mod_no)
@@ -72,57 +72,57 @@ class SPC_module(BH.SPC):
         print_values(self.adjpara)
 
     def show_sync_state(self):
-    	self.get_sync_state(self.mod_no)
-    	print(defs.Sync_States[self.sync_state.value])
+        self.get_sync_state(self.mod_no)
+        print(defs.Sync_States[self.sync_state.value])
 
     def show_break_time(self):
-    	self.get_break_time(self.mod_no)
-    	print(self.bh_time.value)
+        self.get_break_time(self.mod_no)
+        print(self.bh_time.value)
 
     def show_rates(self):
-    	self.read_rates(self.mod_no)
-    	self.print_values(self.rates)
+        self.read_rates(self.mod_no)
+        self.print_values(self.rates)
 
     def show_sequencer_state(self):
-    	self.get_sequencer_state(self.mod_no)
-    	print(defs.Sequencer_States[self.state.value])
+        self.get_sequencer_state(self.mod_no)
+        print(defs.Sequencer_States[self.state.value])
 
     def show_gap_time(self):
-    	self.read_gap_time(self.mod_no)
-    	print(self.bh_time.value)
+        self.read_gap_time(self.mod_no)
+        print(self.bh_time.value)
     
     def show_scan_clk_state(self):
-    	self.get_scan_clk_state(self.mod_no)
-    	print(defs.Scan_Clk_States[self.scan_state.value])
+        self.get_scan_clk_state(self.mod_no)
+        print(defs.Scan_Clk_States[self.scan_state.value])
 
     def show_fifo_usage_degree(self):
-    	self.get_fifo_usage(self.mod_no)
-    	print(str(self.usage_degree.value*100)+'%')
+        self.get_fifo_usage(self.mod_no)
+        print(str(self.usage_degree.value*100)+'%')
 
     def show_phot_stream_info(self):
-    	if self.stream_hndl == None:
-    		print('No stream!')
-    	else:
-    		self.get_phot_stream_info(self.stream_hndl)
-    		self.print_values(self.stream_info)
+        if self.stream_hndl == None:
+            print('No stream!')
+        else:
+            self.get_phot_stream_info(self.stream_hndl)
+            self.print_values(self.stream_info)
 
     def show_photon(self): #Not sure it's wise to use this one as you might end up printing a lot of photon data! Will only print one and then you can loop through.
         if self.stream_hndl == None:
-    		print('No stream!')
-    	else:
-    		self.get_photon(self.stream_hndl)
-    		self.print_values(self.phot_info)
+            print('No stream!')
+        else:
+            self.get_photon(self.stream_hndl)
+            self.print_values(self.phot_info)
 
     def show_fifo_init_vars(self):
-    	self.get_fifo_init_vars(self.mod_no)
-    	print(self.fifo_type.value, self.stream_type.value, self.mt_clock.value, self.spc_header.value)
+        self.get_fifo_init_vars(self.mod_no)
+        print(self.fifo_type.value, self.stream_type.value, self.mt_clock.value, self.spc_header.value)
 
     def show_stream_buffer_size(self, buf_no):
-    	if self.stream_hndl == None:
-    		print('No stream!')
-    	else:
-    		self.get_stream_buffer_size(self.stream_hndl, buf_no)
-    		print(self.buf_size.value)
+        if self.stream_hndl == None:
+            print('No stream!')
+        else:
+            self.get_stream_buffer_size(self.stream_hndl, buf_no)
+            print(self.buf_size.value)
 
 ###########################################
 ###       Measurement functions        ####
@@ -138,19 +138,19 @@ class SPC_module(BH.SPC):
 # - SPC_read_data_block >read the data.
 
     def perform_measurement(self, adc_res, no_of_routing_bits, page)
-    	self.configure_memory(self.mod_no, adc_res, no_of_routing_bits)
-    	self.set_page(self.mod_no, page) 
-    	self.fill_memory(self.mod_no, -1, page, 0) #block=-1 clears all blocks
-    	#Check the clearing is successful
-    	if self.last_retcode == 0:
-    		self.start_measurement(self.mod_no)
-    		self.test_state(self.mod_no)
-    		while self.state.value == 0x80:
-    			self.test_state(self.mod_no) #keeps checking
-    		#Once we exit this loop the reason for exit (success/overflow etc) can be read from self.state with the dict Module_States in SPC_defs.py
-    		#Read the data out after with read_data_block
-    	else:
-    		pass
+        self.configure_memory(self.mod_no, adc_res, no_of_routing_bits)
+        self.set_page(self.mod_no, page) 
+        self.fill_memory(self.mod_no, -1, page, 0) #block=-1 clears all blocks
+        #Check the clearing is successful
+        if self.last_retcode == 0:
+            self.start_measurement(self.mod_no)
+            self.test_state(self.mod_no)
+            while self.state.value == 0x80:
+                self.test_state(self.mod_no) #keeps checking
+            #Once we exit this loop the reason for exit (success/overflow etc) can be read from self.state with the dict Module_States in SPC_defs.py
+            #Read the data out after with read_data_block
+        else:
+            pass
 
 
 
