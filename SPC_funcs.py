@@ -23,6 +23,10 @@ class SPC_module(BH.SPC):
         else:
             print(defs.Init_Error_Codes[self.last_retcode]) #stop as init failed so check errors
 
+###########################################
+#######General Helper funcs################
+###########################################
+
     def modify_parameters(self, parameters_to_update):
         #Takes a list of tuples of the parameter names to update (from SPCData). Use if more than a few paramters but if updating the
         #whole lot better to use set_parameters with a whole new structure of type SPCData. You need to provide the values as the correct c type.
@@ -38,6 +42,9 @@ class SPC_module(BH.SPC):
         self.set_parameters(mod_no) #sets the parameters to the SPCData data
         self.get_parameters(mod_no) #reads them back 
         #Add comparison of old data and new?
+
+    def get_parameter_id(self, parameter_name): #Gets the id value of the parameter, can pass to other funcs for setting/getting individual params
+    	return defs.Parameter_IDs[parameter_name]
 
     def set_and_check_parameter(self, par_id, value, mod_no=None): #for single parameter updates
         if mod_no == None:
