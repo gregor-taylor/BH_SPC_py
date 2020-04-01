@@ -7,6 +7,9 @@
 ###Imports###
 import SPC_lib as BH
 import SPC_defs as defs
+import numpy as np
+import matplotlib.pyplot as plt
+import h5py
 #######
 
 ###Main Class###
@@ -158,6 +161,74 @@ class SPC_module(BH.SPC):
             #Read the data out after with read_data_block
         else:
             pass
+
+    def read_data_block_to_np_arr(self, blocks, page, from_point=0, to_point=None, reduction_factor=1 ):
+    	#Blocks is a list of block numbers.
+    	#Page is the data page (one page is a frame in imaging modes).
+    	#reduction_factor is the data reduction factor - averages a given number of points, must be power of 2.
+    	#from and to are the first and last point numbers within the block (curve).
+    	#Must have called configure_memory before trying to read data so that we have access to the parameters in mem_info.
+    	no_of_points=self.mem_info.block_length/reduction_factor
+    	if to_point == None:
+    		to_point = no_of_points-1
+    	curves=np.ndarray(len(blocks), dtype='object') #to hold all of the curves
+    	curve_id=0
+    	for block in blocks:
+    	    self.read_data_block(self.mod_no, block, page, reduction_factor, from_point, to_point) #reads the data to the buffer, self.buf
+    	    np_data = np.ctypeslib.asarray(self.buf) #then takes that to an np arr
+    	    curves[curve_id]=np_data
+    	    curve_id+=1
+    	return curves
+    	#curves is a numpy array of the returned curves.
+
+    def disp_realtime_curves(self, number_of_curves, save_data=False):
+    	#Little test func, take a number of curves and display them as we go
+    	#Set the measurements up first.
+    	#Setup the canvas
+    	plt.ion()
+    	fig=plt.figure()
+    	ax=fig.add_subplot(111)
+    	ax.set_autoscale(True)
+    	ax.autoscale_view(True,True,True)
+    	line1, =plt.plot([],[],'r-') #blank data
+    	plt.xlabel('Bin')
+    	plt.ylabel('Counts')
+
+    	if save_data==True:
+    		saveFile=h5py.File("TestOutputFile.hdf5", 'w')
+    	for m in range(number_of_curves):
+    		#get data
+    		self.perform_measurement(0, 0, 0)
+    		#read data
+    		curves=self.read_data_block_to_np_arr([0],0)
+    		#plt data
+    		lin1.set_ydata(curves[0])
+    		axes.relim()
+    		ax.autoscale_view(True,True,True)
+    		plt.draw()
+    		#save data if req
+    		if save_data==True:
+    			saveFile.create_dataset('curve_{}'.format(m), data=curves[0])
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
