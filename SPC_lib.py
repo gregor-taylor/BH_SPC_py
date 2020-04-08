@@ -21,7 +21,7 @@ import SPC_defs as defs
 
 class SPC():
     def __init__(self, mod_no, ini_file):
-        self.SPC_lib = ct.CDLL(".dll") #Need to define dll location
+        self.SPC_lib = ct.CDLL('C:\Program Files (x86)\BH\SPCM\spcm64.dll') #Need to define dll location
         self.last_retcode = 0
 
         #Data structures from h file. ct.byref for ints etc, no need for string buffers

@@ -14,7 +14,7 @@ import h5py
 
 ###Main Class###
 class SPC_module(BH.SPC):
-    def __init__(self, mod_no, ini_file='SET_DEFAULT_INI'):
+    def __init__(self, mod_no, ini_file='C:\Program Files (x86)\BH\SPCM\spcm.ini'):
         super().__init__(mod_no, ini_file)
         #Intialises measurement parameters from ini file to the module
         self.SPC_init(self.ini_file)
@@ -147,7 +147,7 @@ class SPC_module(BH.SPC):
 # - SPC_test_state is repeatedly called until it returns an SPC_armed=0 indicating the meas is stopped. The stop condition is defined in the measurement params.
 # - SPC_read_data_block >read the data.
 
-    def perform_measurement(self, adc_res, no_of_routing_bits, page)
+    def perform_measurement(self, adc_res, no_of_routing_bits, page):
         self.configure_memory(self.mod_no, adc_res, no_of_routing_bits)
         self.set_page(self.mod_no, page) 
         self.fill_memory(self.mod_no, -1, page, 0) #block=-1 clears all blocks
