@@ -21,12 +21,12 @@ import SPC_defs as defs
 
 class SPC():
     def __init__(self, mod_no, ini_file):
-        self.SPC_lib = ct.CDLL(".dll") #Need to define dll location
+        self.SPC_lib = ct.CDLL("C:/Program Files (x86)/BH/SPCM/DLL/spcm64.dll") #Need to define dll location
         self.last_retcode = 0
 
         #Data structures from h file. ct.byref for ints etc, no need for string buffers
         self.errorString = ct.create_string_buffer(b"", 70)
-        self.ini_file = ini_file
+        self.ini_file = ini_file.encode('ascii')
         self.mod_no = mod_no
         self.in_use = defs.InUseTable()
         self.mod_info = defs.SPCModInfo()
@@ -45,8 +45,8 @@ class SPC():
         self.scan_state=ct.c_short()
         self.usage_degree=ct.c_float()
         #These buffers below will likely need to be dynamically determined.
-        self.buf= (ct.c_ushort*5e6)() #10Mb
-        self.data_buf = (ct.c_char*1e7)() #10Mb
+        self.buf= (ct.c_ushort*int(5e6))() #10Mb
+        self.data_buf = (ct.c_char*int(1e7))() #10Mb
 
         self.phot_no = ct.c_int()
         self.fifo_type=ct.c_short()
@@ -72,7 +72,7 @@ class SPC():
             print("SPC_%s error %d (%s)." % (func_name, retcode, self.errorString.value.decode("utf-8")))
 
     def SPC_init(self, ini_file): #inits all modules on the bus according to the .ini file
-        self.execute_func(self.SPC_lib.SPC_init(ini_file), 'init')
+        self.execute_func(self.SPC_lib.SPC_init(self.ini_file), 'init')
 
     def get_init_status(self, mod_no): #mod_no = 0...7 module number to be checked
         self.execute_func(self.SPC_lib.SPC_get_init_status(ct.c_short(mod_no)), 'get_init_status')
