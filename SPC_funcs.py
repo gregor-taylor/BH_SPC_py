@@ -2,8 +2,9 @@
 #If we define all custom funcs here and leave the main SPC_lib.py as per the B&H docs (almost).
 
 #Collection of command-line functions to be proceeded with 'show_', i.e 'show_rates' to quickly print counting rates or other params. As we get more complex with GUIs etc we
-#can move away from these but they're always useful for sanity check.
+#can move away from these but they're always useful for sanity check
 
+#Test Line
 ###Imports###
 import SPC_lib as BH
 import SPC_defs as defs
