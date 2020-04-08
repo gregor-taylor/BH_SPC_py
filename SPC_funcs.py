@@ -201,7 +201,7 @@ class SPC_module(BH.SPC):
             saveFile=h5py.File("TestOutputFile.hdf5", 'w')
         for m in range(number_of_curves):
             #get data
-            self.perform_measurement(0, 0, 0)
+            self.perform_measurement(12, 0, 0)
             #read data
             curves=self.read_data_block_to_np_arr([0],0)
             #plt data
