@@ -147,7 +147,7 @@ class SPC():
         self.execute_func(self.SPC_lib.SPC_clear_rates(ct.c_short(mod_no)), 'clear_rates')
 
     def get_sequencer_state(self, mod_no):
-        self.execute_func(self.SPC_lib.SPC_get_sequencer_state(ct.s_short(mod_no), ct.byref(self.state)), 'get_sequencer_state')
+        self.execute_func(self.SPC_lib.SPC_get_sequencer_state(ct.c_short(mod_no), ct.byref(self.state)), 'get_sequencer_state')
 
     def read_gap_time(self, mod_no):
         self.execute_func(self.SPC_lib.SPC_read_gap_time(ct.c_short(mod_no), ct.byref(self.bh_time)), 'read_gap_time')
@@ -224,7 +224,7 @@ class SPC():
         self.stream_hndl = None
 
     def get_fifo_init_vars(self, mod_no):
-        self.execute_func(self.SPC_lib.SPC_get_fifo_init_vars(ct.c_short(mod_no), ct.byref(self.fifo_type), ct.byref(self.stream_type), ct.byref(mt_clock), ct.byref(spc_header)), 'get_fifo_init_vars')
+        self.execute_func(self.SPC_lib.SPC_get_fifo_init_vars(ct.c_short(mod_no), ct.byref(self.fifo_type), ct.byref(self.stream_type), ct.byref(self.mt_clock), ct.byref(self.spc_header)), 'get_fifo_init_vars')
 
     def init_buf_stream(self, fifo_type, stream_type, what_to_read, mt_clock):
         self.execute_func(self.SPC_lib.SPC_init_buf_stream(ct.c_short(fifo_type), ct.c_short(stream_type), ct.c_short(what_to_read), ct.c_int(mt_clock), ct.c_uint(0)), 'init_buf_stream')

@@ -82,7 +82,7 @@ class SPC_module(BH.SPC):
 
     def show_adjust_parameters(self):
         self.get_adjust_parameters(self.mod_no)
-        print_values(self.adjpara)
+        self.print_values(self.adjpara)
 
     def show_sync_state(self):
         self.get_sync_state(self.mod_no)
