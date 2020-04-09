@@ -214,6 +214,30 @@ class SPC_module(BH.SPC):
             if save_data==True:
                 saveFile.create_dataset('curve_{}'.format(m), data=curves[0])
 
+    def set_sync_params(self, threshold, zc_level, holdoff):
+        self.modify_parameters([('sync_threshold', threshold), ('sync_zc_level', zc_level), ('sync_holdoff', holdoff)])        
+
+    def set_cfd_params(self, limit_low, limit_high, zc_level, holdoff):
+        self.modify_parameters([('cfd_limit_low', limit_low), ('cfd_limit_high', limit_high), ('cfd_zc_level', zc_level), ('cfd_holdoff', holdoff)])
+
+    def auto_configure_max_res(self):
+        #ensure max range and set gain to 1
+        self.set_and_check_parameter(self.get_parameter_id('TAC_RANGE'), ???) #check what the max range is again
+        self.set_and_check_parameter(self.get_parameter_id('TAC_GAIN'), 1)
+        #run a measurement and centre with the offset
+        #################
+        #################
+        #set to 1 and loop
+        gain=1
+        if gain != 15:
+            gain+=1
+            self.set_and_check_parameter(self.get_parameter_id('TAC_GAIN'), gain)
+            #run measurement
+            #centre with offset
+            #check if offset limit reached - if so then report error.
+
+
+
 
 
 
