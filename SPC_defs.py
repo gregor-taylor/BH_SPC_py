@@ -87,6 +87,6 @@ class InUseTable(ct.Structure):
               ('mod_6', ct.c_int), ('mod_7', ct.c_int)]
 
 class Rates(ct.Structure):
-     _fields_ = [('tdc1_rate', ct.c_float*8), ('tdc2_rate', ct.c_float*8), ('sync_rate', ct.c_float), ('tdc1_total', ct.c_float),
-                 ('tdc2_total', ct.c_float)]
+     _fields_ = [('sync_rate', ct.c_float), ('cfd_rate', ct.c_float),
+                 ('tac_rate', ct.c_float), ('adc_rate', ct.c_float)]
 
