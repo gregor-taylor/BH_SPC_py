@@ -2,9 +2,8 @@
 #If we define all custom funcs here and leave the main SPC_lib.py as per the B&H docs (almost).
 
 #Collection of command-line functions to be proceeded with 'show_', i.e 'show_rates' to quickly print counting rates or other params. As we get more complex with GUIs etc we
-#can move away from these but they're always useful for sanity check
+#can move away from these but they're always useful for sanity check.
 
-#Test Line
 ###Imports###
 import SPC_lib as BH
 import SPC_defs as defs
@@ -17,7 +16,7 @@ import ctypes as ct
 
 ###Main Class###
 class SPC_module(BH.SPC):
-    def __init__(self, mod_no, ini_file="C:/Program Files (x86)/BH/SPCM/spcm.ini"):
+    def __init__(self, mod_no, ini_file="C:/Program Files (x86)/BH/SPCM/spcm_Glasgow.ini"):
         super().__init__(mod_no, ini_file)
         #Intialises measurement parameters from ini file to the module
         self.SPC_init(self.ini_file)
@@ -158,11 +157,14 @@ class SPC_module(BH.SPC):
         if self.last_retcode == 0:
             self.start_measurement(self.mod_no)
             self.test_state(self.mod_no)
+            print(self.state.value)
             while self.state.value == 0x80:
+                print(self.state.value)
                 self.test_state(self.mod_no) #keeps checking
             #Once we exit this loop the reason for exit (success/overflow etc) can be read from self.state with the dict Module_States in SPC_defs.py
             #Read the data out after with read_data_block
         else:
+            print('here')
             pass
 
     def read_data_block_to_np_arr(self, blocks, page, from_point=0, to_point=None, reduction_factor=1 ):
@@ -213,30 +215,6 @@ class SPC_module(BH.SPC):
             #save data if req
             if save_data==True:
                 saveFile.create_dataset('curve_{}'.format(m), data=curves[0])
-
-    def set_sync_params(self, threshold, zc_level, holdoff):
-        self.modify_parameters([('sync_threshold', threshold), ('sync_zc_level', zc_level), ('sync_holdoff', holdoff)])        
-
-    def set_cfd_params(self, limit_low, limit_high, zc_level, holdoff):
-        self.modify_parameters([('cfd_limit_low', limit_low), ('cfd_limit_high', limit_high), ('cfd_zc_level', zc_level), ('cfd_holdoff', holdoff)])
-
-    def auto_configure_max_res(self):
-        #ensure max range and set gain to 1
-        self.set_and_check_parameter(self.get_parameter_id('TAC_RANGE'), ???) #check what the max range is again
-        self.set_and_check_parameter(self.get_parameter_id('TAC_GAIN'), 1)
-        #run a measurement and centre with the offset
-        #################
-        #################
-        #set to 1 and loop
-        gain=1
-        if gain != 15:
-            gain+=1
-            self.set_and_check_parameter(self.get_parameter_id('TAC_GAIN'), gain)
-            #run measurement
-            #centre with offset
-            #check if offset limit reached - if so then report error.
-
-
 
 
 

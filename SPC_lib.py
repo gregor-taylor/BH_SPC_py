@@ -101,7 +101,7 @@ class SPC():
         self.execute_func(self.SPC_lib.SPC_get_parameter(ct.c_short(mod_no), ct.c_short(par_id), ct.byref(self.SPC_value)), 'get_parameter')
 
     def set_parameter(self, mod_no, par_id, value):
-        self.execute_func(self.SPC_lib.SPC_set_parameter(ct.c_short(mod_no), ct.c_short(par_id), ct.c_float(self.SPC_value)), 'set_parameter')
+        self.execute_func(self.SPC_lib.SPC_set_parameter(ct.c_short(mod_no), ct.c_short(par_id), ct.c_float(value)), 'set_parameter')
 
     def get_eeprom_data(self, mod_no):
         self.execute_func(self.SPC_lib.SPC_get_eeprom_data(ct.c_short(mod_no), ct.byref(self.eep_data)), 'get_eeprom_data')
