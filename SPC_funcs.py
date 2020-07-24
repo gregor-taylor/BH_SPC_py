@@ -2,9 +2,8 @@
 #If we define all custom funcs here and leave the main SPC_lib.py as per the B&H docs (almost).
 
 #Collection of command-line functions to be proceeded with 'show_', i.e 'show_rates' to quickly print counting rates or other params. As we get more complex with GUIs etc we
-#can move away from these but they're always useful for sanity check
+#can move away from these but they're always useful for sanity check.
 
-#Test Line
 ###Imports###
 import SPC_lib as BH
 import SPC_defs as defs
@@ -12,12 +11,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 import h5py
 import ctypes as ct
+from time import sleep
 
 #######
 
 ###Main Class###
 class SPC_module(BH.SPC):
-    def __init__(self, mod_no, ini_file="C:/Program Files (x86)/BH/SPCM/spcm.ini"):
+    def __init__(self, mod_no, ini_file="C:/Program Files (x86)/BH/SPCM/spcm_Glasgow.ini"):
         super().__init__(mod_no, ini_file)
         #Intialises measurement parameters from ini file to the module
         self.SPC_init(self.ini_file)
@@ -158,7 +158,7 @@ class SPC_module(BH.SPC):
         if self.last_retcode == 0:
             self.start_measurement(self.mod_no)
             self.test_state(self.mod_no)
-            while self.state.value == 0x80:
+            while self.state.value == 0xC0: #see docs but this is the two states x80 and x40 combined for the SPC-150
                 self.test_state(self.mod_no) #keeps checking
             #Once we exit this loop the reason for exit (success/overflow etc) can be read from self.state with the dict Module_States in SPC_defs.py
             #Read the data out after with read_data_block
@@ -178,7 +178,7 @@ class SPC_module(BH.SPC):
         curve_id=0
         for block in blocks:
             self.read_data_block(self.mod_no, block, page, reduction_factor, from_point, to_point) #reads the data to the buffer, self.buf
-            np_data = np.ctypeslib.as_array(self.buf) #then takes that to an np arr
+            np_data = np.ctypeslib.as_array(self.buf)[0:int(no_of_points)] #then takes that to an np arr
             curves[curve_id]=np_data
             curve_id+=1
         return curves
@@ -201,7 +201,7 @@ class SPC_module(BH.SPC):
             saveFile=h5py.File("TestOutputFile.hdf5", 'w')
         for m in range(number_of_curves):
             #get data
-            self.perform_measurement(0, 0, 0)
+            self.perform_measurement(12, 0, 0)
             #read data
             curves=self.read_data_block_to_np_arr([0],0)
             #plt data
