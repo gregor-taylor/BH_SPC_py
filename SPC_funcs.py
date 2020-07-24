@@ -11,6 +11,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import h5py
 import ctypes as ct
+from time import sleep
 
 #######
 
@@ -157,14 +158,11 @@ class SPC_module(BH.SPC):
         if self.last_retcode == 0:
             self.start_measurement(self.mod_no)
             self.test_state(self.mod_no)
-            print(self.state.value)
-            while self.state.value == 0x80:
-                print(self.state.value)
+            while self.state.value == 0xC0: #see docs but this is the two states x80 and x40 combined for the SPC-150
                 self.test_state(self.mod_no) #keeps checking
             #Once we exit this loop the reason for exit (success/overflow etc) can be read from self.state with the dict Module_States in SPC_defs.py
             #Read the data out after with read_data_block
         else:
-            print('here')
             pass
 
     def read_data_block_to_np_arr(self, blocks, page, from_point=0, to_point=None, reduction_factor=1 ):
@@ -180,7 +178,7 @@ class SPC_module(BH.SPC):
         curve_id=0
         for block in blocks:
             self.read_data_block(self.mod_no, block, page, reduction_factor, from_point, to_point) #reads the data to the buffer, self.buf
-            np_data = np.ctypeslib.as_array(self.buf) #then takes that to an np arr
+            np_data = np.ctypeslib.as_array(self.buf)[0:int(no_of_points)] #then takes that to an np arr
             curves[curve_id]=np_data
             curve_id+=1
         return curves
