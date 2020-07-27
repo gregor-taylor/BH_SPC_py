@@ -184,28 +184,37 @@ class SPC_module(BH.SPC):
         return curves
         #curves is a numpy array of the returned curves.
 
-    def disp_realtime_curves(self, number_of_curves, save_data=False):
+    def show_realtime_curves(self, number_of_curves, int_time=None, save_data=False, adc_res=12, routing_bits=0):
         #Little test func, take a number of curves and display them as we go
         #Set the measurements up first.
         #Setup the canvas
+        if int_time!=None:
+            self.set_and_check_parameter(15, int_time)
         plt.ion()
         fig=plt.figure()
         ax=fig.add_subplot(111)
         ax.autoscale(True)
         ax.autoscale_view(True,True,True)
         line1, =plt.plot([],[],'r-') #blank data
-        plt.xlabel('Bin')
+        plt.xlabel('Time (ns)')
         plt.ylabel('Counts')
+
+        self.configure_memory(self.mod_no, adc_res, routing_bits)
+        self.get_parameter(self.mod_no, self.get_parameter_id('TAC_GAIN')) #Checks the value
+        tac_gain=self.SPC_value.value
+        self.get_parameter(self.mod_no, self.get_parameter_id('TAC_RANGE')) #Checks the value
+        tac_range=self.SPC_value.value
+        time_range=np.linspace(0, tac_range/tac_gain, num=self.mem_info.block_length)
 
         if save_data==True:
             saveFile=h5py.File("TestOutputFile.hdf5", 'w')
         for m in range(number_of_curves):
             #get data
-            self.perform_measurement(12, 0, 0)
+            self.perform_measurement(adc_res, routing_bits, 0)
             #read data
             curves=self.read_data_block_to_np_arr([0],0)
             #plt data
-            line1.set_data(range(len(curves[0])),curves[0])
+            line1.set_data(time_range,curves[0])
             ax.relim()
             ax.autoscale_view(True,True,True)
             fig.canvas.draw()
@@ -213,6 +222,67 @@ class SPC_module(BH.SPC):
             #save data if req
             if save_data==True:
                 saveFile.create_dataset('curve_{}'.format(m), data=curves[0])
+
+    def set_sync_params(self, threshold, zc_level, holdoff):
+        self.modify_parameters([('sync_threshold', threshold), ('sync_zc_level', zc_level), ('sync_holdoff', holdoff)])        
+
+    def set_cfd_params(self, limit_low, limit_high, zc_level, holdoff):
+        self.modify_parameters([('cfd_limit_low', limit_low), ('cfd_limit_high', limit_high), ('cfd_zc_level', zc_level), ('cfd_holdoff', holdoff)])
+
+    def auto_configure_max_res(self):
+        #ensure max range and set gain to 1
+        gain=1
+        offset_limit=False
+        offset=0
+        plt.ioff()
+        self.set_and_check_parameter(self.get_parameter_id('TAC_RANGE'), 12.5) #check what the max range is again
+        self.set_and_check_parameter(self.get_parameter_id('TAC_GAIN'), 1)
+        #run a measurement and centre with the offset
+        self.perform_measurement(12,0,0)
+        curve=self.read_data_block_to_np_arr([0],0)[0]
+        #plot to check?
+        plt.plot(curve)
+        plt.show()
+        max_id=np.argmax(curve) #the point of the peak
+        while max_id<3000: #for a 4096 point meas
+            offset+=1
+            self.set_and_check_parameter(self.get_parameter_id('TAC_OFFSET'), offset)
+            self.perform_measurement(12,0,0)
+            curve=self.read_data_block_to_np_arr([0],0)[0]
+            max_id=np.argmax(curve)
+        #then once curve is sufficiently over, repeat until gain=15
+        while gain != 15:
+            if offset_limit==False:
+                gain+=1
+                self.set_and_check_parameter(self.get_parameter_id('TAC_GAIN'), gain)
+                self.perform_measurement(12,0,0)
+                curve=self.read_data_block_to_np_arr([0],0)[0]
+                max_id=np.argmax(curve)
+                while max_id<3000: #for a 4096 point meas
+                    if offset==50:
+                        print('Offset limit reached at gain={}. Change cables lengths'.format(gain))
+                        offset_limit=True
+                        break
+                    else:
+                        offset+=1
+                        self.set_and_check_parameter(self.get_parameter_id('TAC_OFFSET'), offset)
+                        self.perform_measurement(12,0,0)
+                        curve=self.read_data_block_to_np_arr([0],0)[0]
+                        max_id=np.argmax(curve)
+            else:
+                break
+        #review
+        self.get_parameter(self.mod_no, self.get_parameter_id('TAC_GAIN')) #Checks the value
+        tac_gain=self.SPC_value.value
+        self.get_parameter(self.mod_no, self.get_parameter_id('TAC_RANGE')) #Checks the value
+        tac_range=self.SPC_value.value
+        time_range=np.linspace(0, tac_range/tac_gain, num=self.mem_info.block_length)
+        plt.plot(time_range, curve)
+        plt.show()
+
+        
+
+
 
 
 
