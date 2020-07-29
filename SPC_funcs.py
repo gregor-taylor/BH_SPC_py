@@ -184,7 +184,7 @@ class SPC_module(BH.SPC):
         return curves
         #curves is a numpy array of the returned curves.
 
-    def show_realtime_curves(self, number_of_curves, int_time=None, save_data=False, adc_res=12, routing_bits=0):
+    def show_realtime_curves(self, number_of_curves, int_time=None, save_data=False, adc_res=12, routing_bits=0, page=0):
         #Little test func, take a number of curves and display them as we go
         #Set the measurements up first.
         #Setup the canvas
@@ -210,9 +210,9 @@ class SPC_module(BH.SPC):
             saveFile=h5py.File("TestOutputFile.hdf5", 'w')
         for m in range(number_of_curves):
             #get data
-            self.perform_measurement(adc_res, routing_bits, 0)
+            self.perform_measurement(adc_res, routing_bits, page)
             #read data
-            curves=self.read_data_block_to_np_arr([0],0)
+            curves=self.read_data_block_to_np_arr([0],page)
             #plt data
             line1.set_data(time_range,curves[0])
             ax.relim()
@@ -235,7 +235,7 @@ class SPC_module(BH.SPC):
         offset_limit=False
         offset=0
         plt.ioff()
-        self.set_and_check_parameter(self.get_parameter_id('TAC_RANGE'), 12.5) #check what the max range is again
+        self.set_and_check_parameter(self.get_parameter_id('TAC_RANGE'), 12.5) #ns
         self.set_and_check_parameter(self.get_parameter_id('TAC_GAIN'), 1)
         #run a measurement and centre with the offset
         self.perform_measurement(12,0,0)
